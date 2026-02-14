@@ -27,7 +27,7 @@ async function accountWorker(config, account, context) {
 
   console.log(`\n[worker:${account.id}] Ищем вакансии по запросу "${config.searchQuery}"...`)
 
-  const stats = { applied: 0, already_applied: 0, skipped: 0, errors: 0 }
+  const stats = { applied: 0, already_applied: 0, skipped: 0, errors: 0, rate_limited: false }
   const concurrency = config.concurrencyPerAccount || 5
   const maxVacanciesPerRun = config.maxVacanciesPerRun || Infinity
   let totalProcessed = 0
@@ -52,20 +52,32 @@ async function accountWorker(config, account, context) {
 
     console.log(`[worker:${account.id}] Страница ${pageNum}: ${batch.length} вакансий — откликаемся батчами по ${concurrency}...`)
 
+    let rateLimited = false
     for (let i = 0; i < batch.length; i += concurrency) {
       const chunk = batch.slice(i, i + concurrency)
       const results = await Promise.all(
         chunk.map(vacancy => applyOne(config, account, context, vacancy))
       )
       for (const result of results) {
+        if (result === 'rate_limited') {
+          rateLimited = true
+          continue
+        }
         const key = result === 'errors' ? 'errors' : result
         if (stats[key] !== undefined) stats[key]++
         else stats.errors++
       }
+      if (rateLimited) break
     }
 
     totalProcessed += batch.length
     console.log(`[worker:${account.id}] Страница ${pageNum} завершена. Всего обработано: ${totalProcessed}. Статистика:`, stats)
+
+    if (rateLimited) {
+      stats.rate_limited = true
+      console.log(`[worker:${account.id}] Лимит откликов HH исчерпан — останавливаем аккаунт, экономим API`)
+      break
+    }
 
     if (totalProcessed >= maxVacanciesPerRun) {
       console.log(`[worker:${account.id}] Достигнут лимит maxVacanciesPerRun (${maxVacanciesPerRun})`)
@@ -134,8 +146,9 @@ async function main() {
   console.log('\n========== ИТОГО ==========')
   let totalApplied = 0
   for (const r of results) {
+    const rateLimitTag = r.rate_limited ? ' [ЛИМИТ ОТКЛИКОВ]' : ''
     console.log(
-      `  ${r.account}: отправлено=${r.applied}, повтор=${r.already_applied}, пропущено=${r.skipped}, ошибки=${r.errors}`
+      `  ${r.account}: отправлено=${r.applied}, повтор=${r.already_applied}, пропущено=${r.skipped}, ошибки=${r.errors}${rateLimitTag}`
     )
     totalApplied += r.applied
   }

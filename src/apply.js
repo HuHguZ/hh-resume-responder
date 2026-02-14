@@ -10,6 +10,11 @@ async function checkAlreadyApplied(page) {
   return el !== null
 }
 
+async function checkRateLimit(page) {
+  const el = await page.$('text=Вы исчерпали лимит откликов')
+  return el !== null
+}
+
 // Заполняет модальное окно с письмом (data-qa селекторы)
 async function fillModalLetter(page, letterText) {
   const textarea = page.locator('[data-qa="vacancy-response-popup-form-letter-input"]')
@@ -167,6 +172,13 @@ export async function applyToVacancy(config, page, vacancy, letterText) {
     for (let i = 0; i < strategies.length; i++) {
       try {
         const success = await strategies[i]()
+
+        // После каждой попытки проверяем лимит откликов
+        if (await checkRateLimit(page)) {
+          console.warn(`[apply] Лимит откликов исчерпан (200 за 24ч) — останавливаем аккаунт`)
+          return 'rate_limited'
+        }
+
         if (success) {
           const withLetter = letterText ? ' (с письмом)' : ''
           console.log(`[apply] Отклик отправлен${withLetter}: "${title}" — ${employer}`)
