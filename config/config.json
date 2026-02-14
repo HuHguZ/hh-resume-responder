@@ -1,0 +1,12 @@
+{
+  "searchQuery": "Frontend разработчик",
+  "area": "113",
+  "headless": false,
+  "sessionDir": "./sessions",
+  "accountsFile": "./config/accounts.json",
+  "geminiModel": "gemini-3-flash-preview",
+  "geminiApiKey": "GEMINI_API_KEY",
+  "concurrencyPerAccount": 5,
+  "delayBetweenAppliesMs": 2000,
+  "maxVacanciesPerRun": 1000
+}
