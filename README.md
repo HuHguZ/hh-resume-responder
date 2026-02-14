@@ -2,6 +2,10 @@
 
 Автоматический отклик на вакансии hh.ru с генерацией сопроводительных писем через Google Gemini AI.
 
+## Автор
+
+[![Telegram](https://img.shields.io/badge/Telegram-@huhguz-2CA5E0?style=flat&logo=telegram&logoColor=white)](https://t.me/huhguz)
+
 ## Возможности
 
 - Параллельная работа с несколькими аккаунтами одновременно
@@ -86,7 +90,3 @@ hh-resume-responder/
     ai.js                — генерация письма через Gemini
     config.js            — загрузка конфига и аккаунтов
 ```
-
-## Автор
-
-[![Telegram](https://img.shields.io/badge/Telegram-@huhguz-2CA5E0?style=flat&logo=telegram&logoColor=white)](https://t.me/huhguz)
