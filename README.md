@@ -8,7 +8,7 @@
 
 ## Вдохновение
 
-[![GitHub](https://img.shields.io/badge/GitHub-jointime1/n8n--hh.ru-181717?style=flat&logo=github&logoColor=white)](https://github.com/jointime1/n8n-hh.ru/tree/master/hh_automation)
+[![GitHub](https://img.shields.io/badge/GitHub-jointime1/n8n--hh.ru-181717?style=flat&logo=github&logoColor=white)](https://github.com/jointime1/n8n-hh.ru)
 
 ## Возможности
 
