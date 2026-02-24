@@ -25,7 +25,8 @@
 ### Отклики
 - 4 стратегии отклика под разные UI-паттерны hh.ru: ссылка «Написать сопроводительное», dropdown «С сопроводительным письмом», клик кнопки с автоопределением типа ответа, вариант «Резюме доставлено»
 - Параллельные отклики внутри страницы (настраивается `concurrencyPerAccount`)
-- Постраничная обработка: сначала все вакансии страницы, потом следующая
+- Случайный порядок обработки вакансий из очереди (меньше дублей подряд, меньше смен вкладок на одни и те же)
+- Случайная задержка между откликами (диапазон `delayBetweenAppliesMs` — `delayBetweenAppliesMaxMs`)
 - Лимит откликов за запуск (`maxVacanciesPerRun`)
 - Обнаружение исчерпания лимита hh.ru (200 откликов / 24ч) и остановка аккаунта
 
@@ -54,14 +55,15 @@ npm install
 ```json
 {
   "searchQuery": "Frontend разработчик",
-  "area": "113",
+  "area": "1",
   "headless": false,
   "sessionDir": "./sessions",
   "accountsFile": "./config/accounts.json",
   "geminiModel": "gemini-3-flash-preview",
   "geminiApiKey": "YOUR_GEMINI_API_KEY",
-  "concurrencyPerAccount": 5,
+  "concurrencyPerAccount": 2,
   "delayBetweenAppliesMs": 2000,
+  "delayBetweenAppliesMaxMs": 6000,
   "maxVacanciesPerRun": 1000,
   "salaryExpectation": "от 400000 на руки",
   "telegram": "@username"
@@ -76,7 +78,8 @@ npm install
 | `geminiApiKey` | API ключ Google Gemini |
 | `geminiModel` | Модель Gemini (например `gemini-2.0-flash`) |
 | `concurrencyPerAccount` | Кол-во параллельных откликов на один аккаунт |
-| `delayBetweenAppliesMs` | Задержка после каждого отклика (мс) |
+| `delayBetweenAppliesMs` | Минимальная задержка между откликами (мс) |
+| `delayBetweenAppliesMaxMs` | Максимальная задержка между откликами (мс); случайное значение в диапазоне |
 | `maxVacanciesPerRun` | Максимум откликов за один запуск |
 | `salaryExpectation` | Ответ на вопрос про зарплату в опросниках |
 | `telegram` | Telegram-ник для вопросов про контакты |

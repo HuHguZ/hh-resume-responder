@@ -8,6 +8,7 @@
   "geminiApiKey": "GEMINI_API_KEY",
   "concurrencyPerAccount": 5,
   "delayBetweenAppliesMs": 2000,
+  "delayBetweenAppliesMaxMs": 6000,
   "maxVacanciesPerRun": 1000,
   "salaryExpectation": "от 400000 на руки",
   "telegram": "@huhguz"

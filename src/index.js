@@ -110,7 +110,9 @@ async function accountWorker(config, account, context) {
         continue
       }
 
-      const vacancy = queue.shift()
+      // Берём случайную вакансию из очереди (избегаем паттернов, снижаем капчи)
+      const randomIdx = Math.floor(Math.random() * queue.length)
+      const vacancy = queue.splice(randomIdx, 1)[0]
       const result = await applyOne(config, account, context, vacancy)
 
       if (result === 'rate_limited') {
@@ -122,6 +124,12 @@ async function accountWorker(config, account, context) {
       const key = result === 'errors' ? 'errors' : result
       if (stats[key] !== undefined) stats[key]++
       else stats.errors++
+
+      // Случайная задержка между откликами (снижает риск капчи)
+      const minDelay = config.delayBetweenAppliesMs || 2000
+      const maxDelay = config.delayBetweenAppliesMaxMs || minDelay * 3
+      const delay = minDelay + Math.floor(Math.random() * (maxDelay - minDelay))
+      await sleep(delay)
     }
   }
 
