@@ -1,6 +1,6 @@
 {
   "searchQuery": "Frontend разработчик",
-  "area": "113",
+  "area": "1",
   "headless": false,
   "sessionDir": "./sessions",
   "accountsFile": "./config/accounts.json",
@@ -8,5 +8,7 @@
   "geminiApiKey": "GEMINI_API_KEY",
   "concurrencyPerAccount": 5,
   "delayBetweenAppliesMs": 2000,
-  "maxVacanciesPerRun": 1000
+  "maxVacanciesPerRun": 1000,
+  "salaryExpectation": "от 400000 на руки",
+  "telegram": "@huhguz"
 }

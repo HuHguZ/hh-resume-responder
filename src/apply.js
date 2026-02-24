@@ -1,3 +1,5 @@
+import { fillQuestionnaire } from './questionnaire.js'
+
 async function checkCaptcha(page) {
   const title = await page.title()
   if (title.toLowerCase().includes('captcha') || title.toLowerCase().includes('robot')) {
@@ -118,10 +120,10 @@ async function strategyButtonClick(page, letterText) {
       await page.waitForTimeout(2500)
     }
 
-    // Вариант Б: страница с вопросами работодателя — пропускаем
+    // Вариант Б: страница с вопросами работодателя — заполняем через AI
     if (await page.$('text=ответить на несколько вопросов')) {
-      console.log(`[debug] Questionnaire — пропускаем`)
-      return false
+      console.log(`[debug] Questionnaire — заполняем через AI`)
+      return 'questionnaire'
     }
 
     // Вариант В: модальное окно с textarea
@@ -150,16 +152,18 @@ async function strategyAlreadyDelivered(page, letterText) {
   return fillInlineLetter(page, letterText)
 }
 
-export async function applyToVacancy(config, page, vacancy, letterText) {
+export async function applyToVacancy(config, page, vacancy, letterText, skipGoto = false) {
   const { href, title, employer } = vacancy
 
   try {
-    await page.goto(href, { waitUntil: 'domcontentloaded', timeout: 20000 })
-    await checkCaptcha(page)
+    if (!skipGoto) {
+      await page.goto(href, { waitUntil: 'domcontentloaded', timeout: 20000 })
+      await checkCaptcha(page)
 
-    if (await checkAlreadyApplied(page)) {
-      console.log(`[apply] Уже откликались: "${title}"`)
-      return 'already_applied'
+      if (await checkAlreadyApplied(page)) {
+        console.log(`[apply] Уже откликались: "${title}"`)
+        return 'already_applied'
+      }
     }
 
     const strategies = [
@@ -171,7 +175,19 @@ export async function applyToVacancy(config, page, vacancy, letterText) {
 
     for (let i = 0; i < strategies.length; i++) {
       try {
-        const success = await strategies[i]()
+        const result = await strategies[i]()
+
+        // Опросник — заполняем через AI
+        if (result === 'questionnaire') {
+          const filled = await fillQuestionnaire(config, page, vacancy)
+          if (filled) {
+            console.log(`[apply] Отклик с опросником отправлен: "${title}" — ${employer}`)
+            await page.waitForTimeout(config.delayBetweenAppliesMs)
+            return 'applied'
+          }
+          console.warn(`[apply] Не удалось заполнить опросник для "${title}"`)
+          return 'skipped'
+        }
 
         // После каждой попытки проверяем лимит откликов
         if (await checkRateLimit(page)) {
@@ -179,7 +195,7 @@ export async function applyToVacancy(config, page, vacancy, letterText) {
           return 'rate_limited'
         }
 
-        if (success) {
+        if (result) {
           const withLetter = letterText ? ' (с письмом)' : ''
           console.log(`[apply] Отклик отправлен${withLetter}: "${title}" — ${employer}`)
           await page.waitForTimeout(config.delayBetweenAppliesMs)
