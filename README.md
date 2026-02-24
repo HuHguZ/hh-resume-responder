@@ -58,7 +58,7 @@ npm install
   "headless": false,
   "sessionDir": "./sessions",
   "accountsFile": "./config/accounts.json",
-  "geminiModel": "gemini-2.0-flash",
+  "geminiModel": "gemini-3-flash-preview",
   "geminiApiKey": "YOUR_GEMINI_API_KEY",
   "concurrencyPerAccount": 5,
   "delayBetweenAppliesMs": 2000,
